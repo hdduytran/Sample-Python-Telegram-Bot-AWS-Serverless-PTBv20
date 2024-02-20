@@ -2,10 +2,10 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "Sample-Python-Telegram-Bot-AWS-Serverless-PTBv20"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1q7y9uu7czp2p"
-s3_prefix = "Sample-Python-Telegram-Bot-AWS-Serverless-PTBv20"
-region = "eu-west-1"
+stack_name = "Stealth-Writer-Telegram-Bot"
+s3_bucket = "hdduytran-deploy-bucket"
+s3_prefix = "hdduytran-deploy-bucket"
+region = "us-west-2"
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
 image_repositories = []
