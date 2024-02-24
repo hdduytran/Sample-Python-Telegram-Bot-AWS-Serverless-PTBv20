@@ -14,7 +14,13 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
                 "MONGO_URI": "mongodb+srv://developer:Developer1@humanizer.d8w9rx9.mongodb.net/",
-                "BOT_TOKEN": "6908330974:AAFAWDPF3DJP8ykOXTJuCpr-bWCosNcnzP8"
+                "BOT_TOKEN": "7159306122:AAFnQpxlCQnwkd2Wjeo8TLzgAd1zHQl_yY0",
+                "INTERVAL_TIME": "0",
+                "CAPTCHA_SECRET": "74f7ebbd661c85e251ca95336008b512",
+                "websitekey": "5b13169c-1aa2-4267-8da1-0ebd54b6596a",
+                "EMAIL": "hdduytran@gmail.com",
+                "PASSWORD": "Nu@nek123",
+                "TOKEN_LAMBDA": "arn:aws:lambda:us-west-2:891377350689:function:Stealth-Writer-Telegram-B-StealthWriterAuthenticat-eJnouqR8hfVe",
             }
         }
     ]

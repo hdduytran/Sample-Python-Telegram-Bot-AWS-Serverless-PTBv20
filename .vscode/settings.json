@@ -30,7 +30,8 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/__pycache__": true,
-        "**/__pycache__.*": true
+        "**/__pycache__.*": true,
+        "/E:/Upwork/Peter/Stealwrite-Authentication": true
     },
     "hide-files.files": []
 }

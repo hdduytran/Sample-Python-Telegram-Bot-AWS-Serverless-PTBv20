@@ -1,18 +1,20 @@
 import requests
 import json
 from core.ssm_handler import get_parameter, update_parameter
+from core.lambda_handler import invoke_lambda
 import time
+import os
 
 url = "https://stealthwriter.ai/api/rewrite-text"
 
 
-def humanizer(text, level=10, model="ninja"):
+def humanizer(text, level=10, model="ninja", retry=0):
     cookies = get_parameter('/steath_writer_cookies')
 
     payload = json.dumps({
         "text": text,
         "method": "humanizer",
-        "fingerprint": "k2V6kxFsaqVVcjdZL8Yk3VDbnl1q1Lq0UuC5RFXIqvdY4659ySi6rpWXcs423XV/+DDVNsmBl1VoOsryLv7aA3P2GOlFf4ySROn6RBCdqGFqIH+yKCfiVC16JjNfJdv9SX9rqTKPjrdJNfHFfQOqhSN02LBH3xCXZQLiEPYqI1db91/IawC0qAUJ7NwS6Y9Cii6odhIAxxveh2/75UgCd2l9JW3dH3PjH7IWhO+3t65I3U0kywQ6okdQSjGwv4nDi7JDo3TYvS49r36NA/vOM8FEcNAPLMYZH4v2+FJeX35M4FV9kMjhLnz76mKVIbBeO1k4qULgzhQxcdKH7vKTgih+4Kr2AI+rSo1gtkiDlYML4rgCWF9lZ+VP727P8+F8VM2acp0mrKtO12jLkI33ptCxuQz3uDpr+jmYqujkwhI=",
+        "fingerprint": "k2V6kxFsaqVVcjdZL8Yk3VDbnl1q1Lq0UuC5RFXIqvfqd20CLeTnC79UK0acksVmiRcHU0Y/SWsu6rEjVV4ZRxnFXLXzElligcE0DP6rzMQUViEmgO0yXZCA1BEnCbOtrpnUiw25FUJl8bdxgPqRfxbemjtBeyRokexzr4Ff2pYMdYPtCMmdoyT8wbhtgmSTKXm/PtfS1NkqdpWT2o394Q/zKNNbKNAyp9unqCnQKuR7bG0CRkMieZyRCU5SxNJzmKlAMvg9e1Gyd/F4DmlqX7yJIpA2o6BJC2W9sD+8MkCaKCcD6yRkQWkAG67UWKNiNJBb7IF9uDkd+iKrvhYMRLzDNcIvsCCVnC7t//9Jk+yLbM6xs2eqegeBo9i3UntG",
         "level": level,
         "model": "ninja"
     })
@@ -39,41 +41,51 @@ def humanizer(text, level=10, model="ninja"):
 
     obj = json.loads(response.text)
 
-    taskId = obj.get('taskId')
+    taskId = obj.get('sentences')
     print(f"Task ID: {taskId}")
 
     if not taskId:
-        return ["Error: Error in processing the text. Please try again"]
+        print(obj)
+        if retry > 0:
+            return None
+        # if "signed in" in obj.get("error") or "":
+        print("Need to sign in")
+        response = invoke_lambda(os.getenv("TOKEN_LAMBDA"), {})
+        if response.get("statusCode") == 200:
+            cookies = response.get("body")
+            update_parameter('/steath_writer_cookies', cookies)
+            return humanizer(text, level, model, retry+1)
+        return None
 
-    new_cookies = response.cookies.get_dict()
-
-    # update the cookies as string
-
-    cookies = "; ".join([f"{k}={v}" for k, v in new_cookies.items()])
-    # print(f"New Cookies: {cookies}")
+    else:
+        new_cookies = response.cookies.get_dict()
+        cookies = "; ".join([f"{k}={v}" for k, v in new_cookies.items()])
+        # print(f"New Cookies: {cookies}")
     update_parameter('/steath_writer_cookies', cookies)
 
-    for i in range(10):
-        time.sleep(1)
-        print(f"Checking status of task: {taskId}")
-        result = get_result(taskId)
-        print(result)
-        if result.get('status') == 'completed':
-            print("Task Completed")
-            sentences = result.get('json').get('sentences')
-            text_list = {}
-            for sentence in sentences:
-                alternatives = sentence.get("alternatives")
-                if not alternatives:
-                    for key in text_list:
-                        text_list[key] += "\n"
-                for i in range(len(alternatives)):
-                    if not text_list.get(i):
-                        text_list[i] = ""
-                    else:
-                        text_list[i] += " "
-                    text_list[i] += alternatives[i]
-            return list(text_list.values())
+    # for i in range(30):
+    #     time.sleep(1)
+    #     print(f"Checking status of task: {taskId}")
+    #     result = get_result(taskId)
+    #     # print(result.get("status"))
+    #     print(result)
+    #     if result.get('status') == 'completed':
+    #         print("Task Completed")
+    sentences = obj.get('sentences')
+    text_list = {}
+    for sentence in sentences:
+        alternatives = sentence.get("alternatives")
+        if not alternatives:
+            for key in text_list:
+                text_list[key] += "\n"
+        for i in range(len(alternatives)):
+            if not text_list.get(i):
+                text_list[i] = ""
+            else:
+                text_list[i] += " "
+            text_list[i] += alternatives[i]
+    return list(text_list.values())
+
 
 def get_result(taskId):
 
@@ -89,7 +101,7 @@ def get_result(taskId):
         'authority': 'vqdtifewupwhdypyimkf.supabase.co',
         'accept': '*/*',
         'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8',
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxZHRpZmV3dXB3aGR5cHlpbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY2MTkwMzUsImV4cCI6MjAyMjE5NTAzNX0.u9ckg_ZijAOjTSitoOev1PzvH6MhfXp3-97FAYajg-E',
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxZHRpZmV3dXB3aGR5cHlpbWtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDg1MTM1OTMsImV4cCI6MjAyNDA4OTU5M30.rbjRooZeTqJm0hNd94ys84aPwGtneOId_qvwK-9kM8E',
         'authorization': authorization,
         'cache-control': 'no-cache',
         'content-profile': 'public',

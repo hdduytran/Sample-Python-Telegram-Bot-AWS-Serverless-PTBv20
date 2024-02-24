@@ -1,0 +1,82 @@
+{
+    "update_id": 27763063,
+    "callback_query": {
+        "id": "344006683384955672",
+        "from": {
+            "id": 6522546241,
+            "is_bot": false,
+            "first_name": "Duy",
+            "last_name": "Tran",
+            "username": "hdduytran",
+            "language_code": "en"
+        },
+        "message": {
+            "message_id": 318,
+            "from": {
+                "id": 6908330974,
+                "is_bot": true,
+                "first_name": "Tools Hub Humanizer Bot",
+                "username": "tools_hub_humanizer_bot"
+            },
+            "chat": {
+                "id": 6522546241,
+                "first_name": "Duy",
+                "last_name": "Tran",
+                "username": "hdduytran",
+                "type": "private"
+            },
+            "date": 1708408712,
+            "text": "Please select a level",
+            "reply_markup": {
+                "inline_keyboard": [
+                    [
+                        {
+                            "text": "1",
+                            "callback_data": "/setlevel 1"
+                        },
+                        {
+                            "text": "2",
+                            "callback_data": "/setlevel 2"
+                        },
+                        {
+                            "text": "3",
+                            "callback_data": "/setlevel 3"
+                        },
+                        {
+                            "text": "4",
+                            "callback_data": "/setlevel 4"
+                        },
+                        {
+                            "text": "5",
+                            "callback_data": "/setlevel 5"
+                        }
+                    ],
+                    [
+                        {
+                            "text": "6",
+                            "callback_data": "/setlevel 6"
+                        },
+                        {
+                            "text": "7",
+                            "callback_data": "/setlevel 7"
+                        },
+                        {
+                            "text": "8",
+                            "callback_data": "/setlevel 8"
+                        },
+                        {
+                            "text": "9",
+                            "callback_data": "/setlevel 9"
+                        },
+                        {
+                            "text": "10",
+                            "callback_data": "/setlevel 10"
+                        }
+                    ]
+                ]
+            }
+        },
+        "chat_instance": "-625731166579255139",
+        "data": "/setlevel 10"
+    }
+}
